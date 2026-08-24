@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply text-slate-800 antialiased;
+  background-color: #0a0f2e;
+  background-image:
+    radial-gradient(900px 500px at 85% -10%, rgba(18, 179, 168, 0.22), transparent 60%),
+    radial-gradient(800px 500px at -10% 20%, rgba(59, 91, 253, 0.25), transparent 55%),
+    radial-gradient(700px 500px at 50% 110%, rgba(139, 92, 246, 0.18), transparent 60%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* ── Movimiento flotante suave ── */
+@keyframes flotar {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+.flotar {
+  animation: flotar 5s ease-in-out infinite;
+}
+.flotar-1 { animation-delay: 0s; }
+.flotar-2 { animation-delay: 0.9s; }
+.flotar-3 { animation-delay: 1.8s; }
+.flotar-4 { animation-delay: 2.6s; }
+
+/* ── Sombra 3D con halo azul (reforzada para verse sobre el fondo noche) ── */
+.sombra-3d {
+  box-shadow:
+    0 26px 70px -22px rgba(0, 0, 0, 0.6),
+    0 22px 70px -8px rgba(59, 91, 253, 0.6),
+    0 6px 30px -4px rgba(59, 91, 253, 0.35),
+    0 2px 0 rgba(255, 255, 255, 0.9) inset;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.sombra-3d:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 36px 90px -22px rgba(0, 0, 0, 0.65),
+    0 30px 90px -6px rgba(59, 91, 253, 0.75),
+    0 10px 40px -2px rgba(59, 91, 253, 0.45),
+    0 2px 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+/* Tarjetas del kanban: al pasar el mouse NO se achican ni se mueven — se resaltan */
+.sombra-3d-suave {
+  box-shadow:
+    0 14px 34px -16px rgba(0, 0, 0, 0.35),
+    0 6px 22px -8px rgba(59, 91, 253, 0.28);
+  transition: box-shadow 0.2s ease;
+}
+.sombra-3d-suave:hover {
+  box-shadow:
+    0 0 0 2px rgba(59, 91, 253, 0.55),
+    0 18px 44px -14px rgba(0, 0, 0, 0.4),
+    0 12px 36px -6px rgba(59, 91, 253, 0.5);
+}
+
+/* Tarjeta siendo arrastrada */
+.arrastrando {
+  opacity: 0.45;
+  transform: rotate(2deg) scale(0.98);
+}
+
+/* Columna receptora resaltada */
+.zona-soltar {
+  outline: 2px dashed rgba(59, 91, 253, 0.55);
+  outline-offset: -6px;
+  background-color: rgba(59, 91, 253, 0.06) !important;
+}
+
+/* Aparición del modal y del popup del agente */
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.aparecer {
+  animation: aparecer 0.22s ease-out;
+}
+
+/* Pulso del botón del agente IA */
+@keyframes pulso-azul {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 91, 253, 0.5), 0 18px 40px -12px rgba(0, 0, 0, 0.5); }
+  50% { box-shadow: 0 0 0 14px rgba(59, 91, 253, 0), 0 18px 40px -12px rgba(0, 0, 0, 0.5); }
+}
+.pulso-azul {
+  animation: pulso-azul 2.6s ease-in-out infinite;
+}
+
+/* Reporte de urgencia que baja al pasar el mouse por el encabezado de una
+   columna: entra desde arriba con una sacudida corta, para que se note que
+   apareció sin llegar a distraer. */
+@keyframes asomar-lateral {
+  0%   { opacity: 0; transform: translateY(-10px) scale(0.97) rotate(-1deg); }
+  55%  { opacity: 1; transform: translateY(3px) scale(1.01) rotate(0.6deg); }
+  75%  { transform: translateY(-1px) rotate(-0.3deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+}
+.asomar-lateral {
+  animation: asomar-lateral 0.4s cubic-bezier(0.34, 1.4, 0.5, 1) both;
+  transform-origin: top center;
+}

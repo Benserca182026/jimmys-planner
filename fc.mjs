@@ -1,0 +1,14 @@
+import { chromium } from "playwright";
+const DIR = "C:/Users/juand/SAAAS-Marketing/proyectos/dashboard-cxc/evidencias-rediseno";
+const nav = await chromium.launch();
+const p = await (await nav.newContext({ viewport: { width: 1500, height: 1200 } })).newPage();
+const err = [];
+p.on("pageerror", e => err.push(String(e).slice(0,120)));
+await p.goto("http://localhost:3007/forecast", { waitUntil: "networkidle" });
+await p.waitForTimeout(2000);
+await p.screenshot({ path: `${DIR}/16-forecast.png`, fullPage: true });
+const t = await p.locator("body").innerText();
+console.log("flotantes:", await p.locator(".tarjeta-flotante").count());
+console.log("marca SIMULACION intacta:", /simulad/i.test(t));
+console.log("errores JS:", err.length ? err : 0);
+await nav.close();

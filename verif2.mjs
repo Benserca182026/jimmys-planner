@@ -1,0 +1,35 @@
+import { chromium } from "playwright";
+const D = "C:/Users/juand/SAAAS-Marketing/proyectos/dashboard-cxc/evidencias-rediseno";
+const B = "https://dashboard-cxc.vercel.app";
+const R = ["/", "/aging", "/prioritarios", "/ventas", "/inventario", "/forecast", "/seguimiento", "/datos", "/login"];
+const nav = await chromium.launch();
+const ctx = await nav.newContext({ viewport: { width: 1500, height: 1000 } });
+let malas = 0;
+for (const r of R) {
+  const p = await ctx.newPage();
+  const err = []; p.on("pageerror", e => err.push(String(e).slice(0, 80)));
+  const res = await p.goto(B + r, { waitUntil: "networkidle", timeout: 60000 });
+  await p.waitForTimeout(1600);
+  const riel = await p.locator('aside a[aria-label]').count();
+  const ok = res.status() === 200 && err.length === 0;
+  if (!ok) malas++;
+  console.log(`${r.padEnd(14)} ${res.status()}  riel:${riel}  errJS:${err.length}`);
+  await p.close();
+}
+const p = await ctx.newPage();
+const err = []; p.on("pageerror", e => err.push(String(e).slice(0,90)));
+await p.goto(B + "/", { waitUntil: "networkidle" });
+await p.waitForTimeout(2200);
+console.log("\n— página 1 en producción —");
+console.log("encabezado EDGE:", await p.locator('header').innerText().then(t => t.includes("EDGE")));
+console.log("agentes:", await p.locator('[aria-label^="Rastreador"], [aria-label^="Balanza"], [aria-label^="Cronómetro"], [aria-label^="Sello"]').count());
+await p.locator('[aria-label^="Balanza"]').hover();
+await p.waitForTimeout(800);
+const ins = await p.locator("div.tarjeta-flotante.absolute").innerText();
+console.log("hover Balanza →", ins.split("\n")[1]?.slice(0, 110));
+const t = await p.locator("body").innerText();
+console.log("cifras:", ["$7,700.00","45%","103.43 d","38.96%"].every(x => t.includes(x)));
+console.log("contexto al final:", t.lastIndexOf("Contexto del corte") > t.indexOf("Distribución por antigüedad"));
+await p.screenshot({ path: `${D}/41-produccion-v2.png` });
+console.log("errores JS:", err.length ? err : 0, "| rutas con problema:", malas);
+await nav.close();

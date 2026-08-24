@@ -1,0 +1,16 @@
+import { chromium } from "playwright";
+const nav = await chromium.launch();
+const p = await (await nav.newContext({ viewport: { width: 1600, height: 1000 } })).newPage();
+const errores = [];
+p.on("pageerror", (e) => errores.push(String(e).slice(0, 90)));
+await p.goto("https://dataflow-cyan.vercel.app/design-project.html?project=dashboard-comercial", { waitUntil: "networkidle" });
+await p.waitForTimeout(4000);
+await p.locator('text=M1 · Fundamento').first().click();
+await p.waitForTimeout(3500);
+console.log("titulo:", await p.title());
+const txt = await p.locator("body").innerText();
+console.log("aparece el proyecto:", txt.includes("Dashboard Comercial"));
+console.log("nodos en pantalla:", await p.locator(".node, .canvas-node, [data-node-id]").count());
+console.log("errores:", errores.length ? errores.slice(0, 2) : "ninguno");
+await p.screenshot({ path: "C:/Users/juand/dashboard-comercial/canvas.png" });
+await nav.close();

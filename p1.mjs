@@ -1,0 +1,13 @@
+import { chromium } from "playwright";
+const D = "C:/Users/juand/SAAAS-Marketing/proyectos/dashboard-cxc/evidencias-rediseno";
+const nav = await chromium.launch();
+const p = await (await nav.newContext({ viewport: { width: 1500, height: 1100 } })).newPage();
+const err = []; p.on("pageerror", e => err.push(String(e).slice(0, 100)));
+await p.goto("http://localhost:3007/", { waitUntil: "networkidle" });
+await p.waitForTimeout(2800);
+await p.screenshot({ path: `${D}/22-pagina1-piel.png`, fullPage: true });
+const t = await p.locator("body").innerText();
+console.log("flotantes:", await p.locator(".piel-referencia .tarjeta-flotante").count());
+console.log("cifras intactas:", ["$7,700.00","45%","103.43 d","38.96%"].every(x => t.includes(x)));
+console.log("errores JS:", err.length ? err : 0);
+await nav.close();

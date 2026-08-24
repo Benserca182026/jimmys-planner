@@ -1,0 +1,14 @@
+import { chromium } from "playwright";
+const nav = await chromium.launch();
+const p = await (await nav.newContext({ viewport: { width: 1500, height: 1000 } })).newPage();
+const errores = [];
+p.on("pageerror", (e) => errores.push(String(e).slice(0, 100)));
+p.on("console", (m) => { if (m.type() === "error") errores.push(m.text().slice(0, 100)); });
+await p.goto("file:///C:/Users/juand/dataflow/index.html", { waitUntil: "networkidle" });
+await p.waitForTimeout(2500);
+console.log("titulo:", await p.title());
+console.log("nav:", (await p.locator(".topnav").innerText()).replace(/\n/g, " | "));
+console.log("proyectos:", await p.locator(".project-card, article").count());
+console.log("errores:", errores.length ? errores.slice(0, 3) : "ninguno");
+await p.screenshot({ path: "C:/Users/juand/dataflow/vista.png" });
+await nav.close();
