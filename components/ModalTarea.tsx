@@ -5,7 +5,7 @@
 // los más grandes solo como referencia (nombre/tamaño).
 
 import { useState } from "react";
-import { COLORES_CATEGORIA, type Estado } from "@/lib/datos";
+import { colorCategoria, type Estado } from "@/lib/datos";
 import { usePlanner, type Prioridad, type Tarea } from "@/lib/estado";
 
 const ESTADOS: { clave: Estado; etiqueta: string; color: string }[] = [
@@ -138,7 +138,7 @@ export function ModalTarea({
     usePlanner();
   const [comentario, setComentario] = useState("");
   const [aviso, setAviso] = useState<string | null>(null);
-  const col = COLORES_CATEGORIA[tarea.categoria];
+  const col = colorCategoria(tarea.categoria);
 
   const enviarComentario = () => {
     if (comentario.trim() === "") return;

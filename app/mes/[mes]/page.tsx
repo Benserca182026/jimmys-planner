@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import {
-  COLORES_CATEGORIA,
+  colorCategoria,
   VISTA_MENSUAL,
   VISTA_SEMANAL_JULIO,
   type Estado,
@@ -163,7 +163,7 @@ export default function PaginaMes() {
                     </div>
                     <div className="space-y-2.5">
                       {items.map((t) => {
-                        const c = COLORES_CATEGORIA[t.categoria];
+                        const c = colorCategoria(t.categoria);
                         return (
                           <button
                             key={t.id}

@@ -9,7 +9,7 @@
 //   2) IA — botón aparte, no puntúa ni reordena, sólo trae datos con cita.
 
 import { useMemo, useState } from "react";
-import { COLORES_CATEGORIA } from "@/lib/datos";
+import { colorCategoria } from "@/lib/datos";
 import { detectarFechasOcultas, diasHasta, parsearFechaCorta } from "@/lib/deteccion";
 import { usePlanner, type Tarea } from "@/lib/estado";
 
@@ -179,7 +179,7 @@ export function ReporteUrgencia({
                   </div>
                   <div className="space-y-1">
                     {b.items.slice(0, 4).map((c, i) => {
-                      const col = COLORES_CATEGORIA[c.t.categoria];
+                      const col = colorCategoria(c.t.categoria);
                       return (
                         <div
                           key={c.t.id}

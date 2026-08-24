@@ -3,7 +3,7 @@
 // devuelve un resultado visual (barras, rankings, listas). Instantáneas,
 // exactas y gratis.
 
-import { COLORES_CATEGORIA, type Categoria } from "./datos";
+import { colorCategoria, type Categoria } from "./datos";
 import type { Tarea } from "./estado";
 
 // ── Tipos de resultado visual que las skills pueden producir ──
@@ -90,7 +90,7 @@ const analisisPrioridad: Skill = {
             titulo: p.t.empresa,
             subtitulo: `${p.t.tema.slice(0, 60)}${p.t.tema.length > 60 ? "…" : ""} · ${p.razones.join(", ") || "sin señales extra"}`,
             valor: `${p.score} pts`,
-            color: COLORES_CATEGORIA[p.t.categoria].punto,
+            color: colorCategoria(p.t.categoria).punto,
             destacada: i === 0,
           })),
           nota: "Score: Urgente +50 · Prioridad A +30 · fecha sin confirmar +15 · con fecha +10 · categoría más cargada +10 · con actividad +5",
@@ -126,7 +126,7 @@ const cargaCategorias: Skill = {
             etiqueta: cat,
             valor: ts.length,
             pct: Math.round((ts.length / max) * 100),
-            color: COLORES_CATEGORIA[cat].punto,
+            color: colorCategoria(cat).punto,
             detalle: `${ts.length} tareas · ${pct(ts.length, total)}% del total · ${ts.filter((t) => t.estado === "pendiente").length} pendientes`,
           })),
         },
@@ -197,7 +197,14 @@ const topEmpresas: Skill = {
     const max = orden[0]?.[1].length ?? 1;
 
     return {
-      resumen: `${porEmpresa.size} empresas/frentes con tareas abiertas — ${orden[0]?.[0]} lidera con ${orden[0]?.[1].length}.`,
+      // Tres casos, no dos. Interpolar `orden[0]?.[0]` sobre un arreglo vacio
+      // no lanza —el `?.` corta la cadena— pero imprime la palabra "undefined"
+      // en la cara del usuario: la ausencia se cuela como si fuera un dato.
+      // La rama vacia se separa, igual que ya hace `radarFechas` mas arriba.
+      resumen:
+        orden.length === 0
+          ? "Ninguna empresa/frente tiene tareas abiertas — no hay nada que rankear."
+          : `${porEmpresa.size} empresas/frentes con tareas abiertas — ${orden[0][0]} lidera con ${orden[0][1].length}.`,
       secciones: [
         {
           titulo: "Ranking por volumen de tareas abiertas",
@@ -206,7 +213,7 @@ const topEmpresas: Skill = {
             etiqueta: emp,
             valor: ts.length,
             pct: Math.round((ts.length / max) * 100),
-            color: COLORES_CATEGORIA[ts[0].categoria].punto,
+            color: colorCategoria(ts[0].categoria).punto,
             detalle: ts.map((t) => t.tema.slice(0, 30)).join(" · ").slice(0, 90),
           })),
         },

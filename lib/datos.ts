@@ -27,6 +27,25 @@ export const COLORES_CATEGORIA: Record<
   Personal: { fondo: "#f1f4f8", borde: "#dbe2ec", texto: "#475569", punto: "#64748b" },
 };
 
+/** Pinta de una categoria que NO esta en el catalogo. Neutra a proposito: una
+ *  categoria desconocida no debe disfrazarse de una conocida. */
+export const COLOR_CATEGORIA_DESCONOCIDA = {
+  fondo: "#f1f2f4", borde: "#d9dbe0", texto: "#5c6068", punto: "#8b8f98",
+};
+
+/** Lectura TOLERANTE del catalogo de colores.
+ *
+ *  Indexar COLORES_CATEGORIA directo es un TypeError esperando: el tipo
+ *  `Record<Categoria, ...>` le promete al compilador que la clave siempre
+ *  existe, asi que TypeScript NO avisa —el proyecto typechequea limpio— y el
+ *  dato que entra de afuera (Supabase, la hoja de Excel, un "Legal" por
+ *  "Legal-Admin") revienta recien en runtime. El tipo tapaba el agujero en vez
+ *  de cerrarlo. Aca la ausencia se vuelve un valor, no una excepcion. */
+export const colorCategoria = (
+  cat: string
+): { fondo: string; borde: string; texto: string; punto: string } =>
+  COLORES_CATEGORIA[cat as Categoria] ?? COLOR_CATEGORIA_DESCONOCIDA;
+
 /** Agenda a la que pertenece una tarea (ids de AGENDAS, más abajo). */
 export type AgendaId = "mexico" | "latam" | "varias" | "latam-oil";
 

@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AGENDAS,
   COLORES_CATEGORIA,
+  colorCategoria,
   VISTA_MENSUAL,
   type Categoria,
   type Estado,
@@ -268,7 +269,7 @@ export default function PaginaPlanner() {
               </button>
               <span className="mr-1 h-4 w-px bg-white/20" />
               {categorias.map((c) => {
-                const col = COLORES_CATEGORIA[c];
+                const col = colorCategoria(c);
                 const activa = filtroCategoria === c;
                 return (
                   <button
@@ -375,7 +376,7 @@ export default function PaginaPlanner() {
                         </p>
                       )}
                       {agrupar(items).map(([cat, delGrupo]) => {
-                      const cg = COLORES_CATEGORIA[cat];
+                      const cg = colorCategoria(cat);
                       const clave = `${col.clave}:${cat}`;
                       const cerrado = !abiertos.has(clave);
                       const urgentes = delGrupo.filter((t) => t.prioridad === "Urgente").length;
@@ -412,7 +413,7 @@ export default function PaginaPlanner() {
                         </button>
 
                         {!cerrado && delGrupo.map((t) => {
-                        const c2 = COLORES_CATEGORIA[t.categoria];
+                        const c2 = colorCategoria(t.categoria);
                         return (
                           <article
                             key={t.id}
