@@ -164,11 +164,17 @@ export default function PaginaPlanner() {
 
       {/* ── 1. VISTA MENSUAL — clic en un mes abre su subpágina ── */}
       <section className="mb-10">
-        <div className="mb-5 flex items-center gap-3">
+        <div className="mb-5 flex flex-wrap items-center gap-3">
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-lg backdrop-blur">🗂️</span>
           <h2 className="text-2xl font-bold tracking-tight text-white">
             Vista mensual — últimos 3 meses
           </h2>
+          <Link
+            href="/mes"
+            className="ml-auto rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+          >
+            🗓️ Abrir calendario →
+          </Link>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-3">

@@ -4,8 +4,8 @@
 // + las tareas específicas del corte, clicables para comentar/adjuntar.
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   colorCategoria,
   VISTA_MENSUAL,
@@ -25,8 +25,13 @@ const GRUPOS_ESTADO: { clave: Estado; titulo: string; color: string }[] = [
   { clave: "listo", titulo: "Listas", color: "#3b5bfd" },
 ];
 
+// Al calendario real: mayo y junio ya no tienen página estática propia —
+// su detalle vive en /mes (la rejilla mensual), posicionada en ese mes.
+const MES_CALENDARIO: Record<string, string> = { mayo: "2026-05", junio: "2026-06" };
+
 export default function PaginaMes() {
   const params = useParams<{ mes: string }>();
+  const router = useRouter();
   const { tareas } = usePlanner();
   const [tareaAbierta, setTareaAbierta] = useState<Tarea | null>(null);
 
@@ -38,13 +43,33 @@ export default function PaginaMes() {
     ? tareas.find((t) => t.id === tareaAbierta.id) ?? null
     : null;
 
+  // Redirección de los meses sin subpágina propia hacia el calendario.
+  useEffect(() => {
+    if (nombre && !esJulio) router.replace(`/mes?m=${MES_CALENDARIO[id]}`);
+  }, [nombre, esJulio, id, router]);
+
   if (!nombre || !resumen) {
     return (
       <main className="mx-auto max-w-3xl px-6 py-16 text-center">
         <p className="text-lg text-white">Ese mes no existe en el planner.</p>
-        <Link href="/" className="mt-4 inline-block rounded-full bg-white px-5 py-2 text-sm font-semibold text-slate-900">
-          ← Volver al tablero
-        </Link>
+        <div className="mt-4 flex justify-center gap-3">
+          <Link href="/" className="inline-block rounded-full bg-white px-5 py-2 text-sm font-semibold text-slate-900">
+            ← Volver al tablero
+          </Link>
+          <Link href="/mes" className="inline-block rounded-full border border-white/25 bg-white/10 px-5 py-2 text-sm font-semibold text-white backdrop-blur">
+            🗓️ Abrir el calendario
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (!esJulio) {
+    return (
+      <main className="mx-auto max-w-3xl px-6 py-16 text-center">
+        <p className="text-sm text-slate-300/80">
+          Abriendo {nombre} en el calendario…
+        </p>
       </main>
     );
   }
@@ -70,6 +95,12 @@ export default function PaginaMes() {
               {resumen.estadoMes === "cerrado" ? "Mes cerrado" : "Mes en curso · a la fecha"}
             </p>
           </div>
+          <Link
+            href="/mes?m=2026-07"
+            className="ml-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+          >
+            🗓️ Ver en el calendario
+          </Link>
         </div>
         <div className="sombra-3d-suave flex items-center gap-3 rounded-2xl bg-white px-5 py-3">
           <Donut listo={resumen.listo} enProceso={resumen.enProceso} terminado={resumen.terminado} tamano={56} />
@@ -80,8 +111,7 @@ export default function PaginaMes() {
         </div>
       </header>
 
-      {esJulio ? (
-        <>
+      <>
           {/* Vista semanal — Julio (como el planner original) */}
           <section className="mb-10">
             <div className="mb-1 flex items-center gap-3">
@@ -194,29 +224,7 @@ export default function PaginaMes() {
               })}
             </div>
           </section>
-        </>
-      ) : (
-        <section className="sombra-3d mx-auto max-w-xl rounded-[26px] bg-white p-8 text-center">
-          <div className="mx-auto w-fit">
-            <Donut listo={resumen.listo} enProceso={resumen.enProceso} terminado={resumen.terminado} />
-          </div>
-          <p className="mt-4 text-lg font-bold text-slate-900">
-            {nombre} cerró con {total} pendientes
-          </p>
-          <p className="mt-2 text-sm leading-relaxed text-slate-500">
-            El archivo actual (Agenda 17_07.xlsx) solo trae el detalle de tareas del
-            corte vigente — no hay lista de tareas específicas de {nombre} para
-            mostrar. Cuando cargues un archivo con histórico, este mes tendrá su
-            propio detalle igual que Julio.
-          </p>
-          <Link
-            href="/mes/julio"
-            className="mt-5 inline-block rounded-full bg-[#3b5bfd] px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
-          >
-            Ver el detalle de Julio →
-          </Link>
-        </section>
-      )}
+      </>
 
       {tareaModal && <ModalTarea tarea={tareaModal} onCerrar={() => setTareaAbierta(null)} />}
       <AgenteIA />
