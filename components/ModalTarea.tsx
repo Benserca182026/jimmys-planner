@@ -370,7 +370,7 @@ export function ModalTarea({
           </label>
           {aviso && <p className="mt-2 text-xs text-amber-700">{aviso}</p>}
           <p className="mt-2 text-[10px] text-slate-400">
-            Los comentarios y archivos se guardan en este navegador (localStorage), no en un servidor.
+            Los comentarios y archivos se guardan en la base del planner y se ven desde cualquier dispositivo. Archivos: hasta 1MB viaja el contenido; más grandes, sólo nombre y tamaño.
           </p>
         </div>
       </div>

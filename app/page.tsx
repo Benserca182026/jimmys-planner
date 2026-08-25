@@ -500,7 +500,7 @@ export default function PaginaPlanner() {
       </section>
 
       <footer className="mt-10 pb-6 text-center text-xs text-slate-400/70">
-        Jimmy&apos;s Planner · datos del archivo Agenda 17_07.xlsx · los cambios se guardan en este navegador
+        Jimmy&apos;s Planner · datos del archivo Agenda 17_07.xlsx · los cambios se guardan en la base y se ven igual desde cualquier dispositivo
       </footer>
 
       {tareaModal && <ModalTarea tarea={tareaModal} onCerrar={() => setTareaAbierta(null)} />}
