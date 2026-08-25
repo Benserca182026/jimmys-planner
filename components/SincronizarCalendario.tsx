@@ -137,6 +137,13 @@ export function SincronizarCalendario() {
 
   const marcar = (clave: string) => setResueltas(new Set(resueltas).add(clave));
 
+  // Lo que queda por atender, ya descontado lo resuelto/traído. Sin esto, las
+  // tarjetas seguían en pantalla con el conteo viejo y el cuerpo vacío después
+  // de resolver la última fila.
+  const divergenciasPendientes =
+    divergencias?.filter((d) => !resueltas.has(`${d.idTarea}-${d.tipo}`)) ?? null;
+  const sueltosPendientes = sueltos?.filter((s) => !traidos.has(s.idEvento)) ?? null;
+
   /**
    * Trae un evento del calendario al tablero como tarea, y de paso le estampa
    * al evento el número de tarea: desde ese momento quedan emparejados en las
@@ -198,15 +205,14 @@ export function SincronizarCalendario() {
         </div>
       )}
 
-      {divergencias && divergencias.length > 0 && (
+      {divergenciasPendientes && divergenciasPendientes.length > 0 && (
         <div className="sombra-3d mt-2 space-y-2 rounded-[20px] bg-white/95 p-3.5">
           <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
-            {divergencias.length} diferencia{divergencias.length === 1 ? "" : "s"} entre el calendario y el tablero
+            {divergenciasPendientes.length} diferencia{divergenciasPendientes.length === 1 ? "" : "s"} entre el calendario y el tablero
           </p>
 
-          {divergencias.map((d) => {
+          {divergenciasPendientes.map((d) => {
             const clave = `${d.idTarea}-${d.tipo}`;
-            if (resueltas.has(clave)) return null;
             return (
               <div
                 key={clave}
@@ -284,18 +290,17 @@ export function SincronizarCalendario() {
       )}
 
       {/* Lo que está en el calendario y el tablero no conoce. */}
-      {sueltos && sueltos.length > 0 && (
+      {sueltosPendientes && sueltosPendientes.length > 0 && (
         <div className="sombra-3d mt-2 rounded-[20px] bg-white/95 p-3.5">
           <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
-            En el calendario pero no en el tablero ({sueltos.filter((s) => !traidos.has(s.idEvento)).length})
+            En el calendario pero no en el tablero ({sueltosPendientes.length})
           </p>
           <p className="mb-2 text-[10px] text-slate-500">
             Eventos que cargaste a mano en Google. Al traerlos, el tablero les deja
             su marca y quedan emparejados para siempre.
           </p>
           <div className="space-y-2">
-            {sueltos.map((ev) => {
-              if (traidos.has(ev.idEvento)) return null;
+            {sueltosPendientes.map((ev) => {
               return (
                 <div
                   key={ev.idEvento}
