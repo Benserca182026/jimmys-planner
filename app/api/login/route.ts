@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { NOMBRE_COOKIE_SESION, VALOR_SESION } from "@/lib/sesion";
 
 // Credenciales del planner (definidas por el dueño del proyecto).
 const USUARIO = "Jimmy";
@@ -8,7 +9,7 @@ export async function POST(req: Request) {
   const { usuario, contrasena } = await req.json().catch(() => ({}));
   if (usuario === USUARIO && contrasena === CONTRASENA) {
     const res = NextResponse.json({ ok: true });
-    res.cookies.set("jp_sesion", "activa", {
+    res.cookies.set(NOMBRE_COOKIE_SESION, VALOR_SESION, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
@@ -25,6 +26,6 @@ export async function POST(req: Request) {
 
 export async function DELETE() {
   const res = NextResponse.json({ ok: true });
-  res.cookies.set("jp_sesion", "", { maxAge: 0, path: "/" });
+  res.cookies.set(NOMBRE_COOKIE_SESION, "", { maxAge: 0, path: "/" });
   return res;
 }
