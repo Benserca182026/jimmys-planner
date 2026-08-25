@@ -14,17 +14,23 @@ export default function PaginaLogin() {
     e.preventDefault();
     setError(null);
     setCargando(true);
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ usuario, contrasena }),
-    });
-    setCargando(false);
-    if (res.ok) {
-      router.push("/");
-      router.refresh();
-    } else {
-      setError("Usuario o contraseña incorrectos");
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario, contrasena }),
+      });
+      if (res.ok) {
+        router.push("/");
+        router.refresh();
+      } else {
+        setError("Usuario o contraseña incorrectos");
+      }
+    } catch {
+      // Sin esto, una caída de red dejaba el botón en "Entrando…" para siempre.
+      setError("No se pudo contactar el servidor. Probá de nuevo.");
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -52,6 +58,8 @@ export default function PaginaLogin() {
             value={usuario}
             onChange={(e) => setUsuario(e.target.value)}
             autoComplete="username"
+            autoFocus
+            required
             className="w-full rounded-xl border border-slate-200 px-4 py-2.5 outline-none transition focus:border-[#3b5bfd] focus:ring-2 focus:ring-[#3b5bfd]/20"
           />
         </label>
@@ -64,6 +72,7 @@ export default function PaginaLogin() {
             value={contrasena}
             onChange={(e) => setContrasena(e.target.value)}
             autoComplete="current-password"
+            required
             className="w-full rounded-xl border border-slate-200 px-4 py-2.5 outline-none transition focus:border-[#3b5bfd] focus:ring-2 focus:ring-[#3b5bfd]/20"
           />
         </label>
