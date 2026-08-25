@@ -18,6 +18,7 @@ import {
   type Estado,
 } from "@/lib/datos";
 import { usePlanner, type Tarea } from "@/lib/estado";
+import { diasHasta, parsearFechaCorta } from "@/lib/deteccion";
 import { Donut } from "@/components/Donut";
 import { ModalTarea } from "@/components/ModalTarea";
 import { AgenteIA } from "@/components/AgenteIA";
@@ -48,6 +49,8 @@ export default function PaginaPlanner() {
   const { tareas, moverTarea, conectado, error: errorBase } = usePlanner();
   const [pestana, setPestana] = useState<Pestana>("pendientes");
   const [filtroCategoria, setFiltroCategoria] = useState<Categoria | null>(null);
+  // Búsqueda libre sobre el tablero: empresa, tema o involucrados.
+  const [busqueda, setBusqueda] = useState("");
   const [tareaAbierta, setTareaAbierta] = useState<Tarea | null>(null);
   const [columnaSobre, setColumnaSobre] = useState<Estado | null>(null);
   // Columna cuyo encabezado tiene el mouse encima: ahí asoma el reporte.
@@ -80,9 +83,17 @@ export default function PaginaPlanner() {
     () => [...new Set(deLaPestana.map((t) => t.categoria))] as Categoria[],
     [deLaPestana]
   );
-  const visibles = filtroCategoria
+  const q = busqueda.trim().toLowerCase();
+  const visibles = (filtroCategoria
     ? deLaPestana.filter((t) => t.categoria === filtroCategoria)
-    : deLaPestana;
+    : deLaPestana
+  ).filter(
+    (t) =>
+      q === "" ||
+      t.empresa.toLowerCase().includes(q) ||
+      t.tema.toLowerCase().includes(q) ||
+      (t.involucrados ?? "").toLowerCase().includes(q)
+  );
 
   // Claves de todos los grupos visibles ahora, para el botón de contraer/desplegar todo.
   const clavesDeGrupos = useMemo(
@@ -257,6 +268,35 @@ export default function PaginaPlanner() {
         {/* El tablero es el mismo en todas las pestañas: solo cambia el conjunto
             de tarjetas (todas, o las de la agenda elegida). */}
         <>
+            {/* Buscador del tablero: filtra las tarjetas mientras escribís.
+                Con búsqueda activa los grupos se muestran abiertos — de nada
+                sirve encontrar si el hallazgo queda plegado. */}
+            <div className="mb-3 flex max-w-sm items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur">
+              <span className="text-sm text-white/60">🔎</span>
+              <input
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                placeholder="Buscar empresa, tema o persona…"
+                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/40"
+              />
+              {busqueda !== "" && (
+                <button
+                  onClick={() => setBusqueda("")}
+                  className="shrink-0 text-sm text-white/60 transition hover:text-white"
+                  aria-label="Limpiar búsqueda"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            {q !== "" && (
+              <p className="mb-3 text-xs text-slate-300/80">
+                {visibles.length === 0
+                  ? "Ninguna tarjeta coincide con la búsqueda."
+                  : `${visibles.length} tarjeta${visibles.length === 1 ? "" : "s"} coincide${visibles.length === 1 ? "" : "n"}.`}
+              </p>
+            )}
+
             {/* Leyenda de subcategorías por color (filtra al hacer clic) */}
             <div className="mb-5 flex flex-wrap items-center gap-2">
               <button
@@ -378,7 +418,7 @@ export default function PaginaPlanner() {
                       {agrupar(items).map(([cat, delGrupo]) => {
                       const cg = colorCategoria(cat);
                       const clave = `${col.clave}:${cat}`;
-                      const cerrado = !abiertos.has(clave);
+                      const cerrado = q === "" && !abiertos.has(clave);
                       const urgentes = delGrupo.filter((t) => t.prioridad === "Urgente").length;
                       return (
                       <div key={clave} className="space-y-2">
@@ -455,12 +495,38 @@ export default function PaginaPlanner() {
                                   👤 {t.involucrados}
                                 </span>
                               )}
-                              {t.fecha && (
-                                <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-slate-600 ring-1 ring-slate-200">
-                                  📅 {t.fecha}
-                                  {t.confirmada === "Si" ? " ✓" : t.confirmada === "No" ? " (sin confirmar)" : ""}
-                                </span>
-                              )}
+                              {t.fecha &&
+                                (() => {
+                                  // El chip de fecha avisa cuánto falta: rojo si
+                                  // venció o es hoy, ámbar si cae en la semana.
+                                  const f = hoy ? parsearFechaCorta(t.fecha, hoy) : null;
+                                  const dias = f && hoy ? diasHasta(f, hoy) : null;
+                                  const clase =
+                                    dias !== null && dias <= 0
+                                      ? "bg-red-50 text-red-700 ring-red-200"
+                                      : dias !== null && dias <= 7
+                                      ? "bg-amber-50 text-amber-700 ring-amber-200"
+                                      : "bg-white text-slate-600 ring-slate-200";
+                                  const cuando =
+                                    dias === null
+                                      ? ""
+                                      : dias < 0
+                                      ? " · venció"
+                                      : dias === 0
+                                      ? " · HOY"
+                                      : dias === 1
+                                      ? " · mañana"
+                                      : dias <= 7
+                                      ? ` · en ${dias}d`
+                                      : "";
+                                  return (
+                                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${clase}`}>
+                                      📅 {t.fecha}
+                                      {cuando}
+                                      {t.confirmada === "Si" ? " ✓" : t.confirmada === "No" ? " (sin confirmar)" : ""}
+                                    </span>
+                                  );
+                                })()}
                               {t.comentarios.length > 0 && (
                                 <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-[#3b5bfd] ring-1 ring-slate-200">
                                   💬 {t.comentarios.length}
